@@ -1,0 +1,105 @@
+#include <Arduino.h>
+#include "BleKeyboard.h"
+#include "Button.h"
+
+//ESP32 DEV KIT V1
+// #define LED 2
+// gpio_num_t VOLUME_UP_BUTTON_PIN = GPIO_NUM_13;
+// gpio_num_t VOLUME_DOWN_BUTTON_PIN = GPIO_NUM_12;
+// gpio_num_t NEXT_TRACK_BUTTON_PIN = GPIO_NUM_14;
+// gpio_num_t PREVIOUS_TRACK_BUTTON_PIN = GPIO_NUM_27;
+// gpio_num_t PLAY_PAUSE_BUTTON_PIN = GPIO_NUM_26;
+
+//ESP32-C3 super mini
+#define LED 8
+gpio_num_t VOLUME_UP_BUTTON_PIN = GPIO_NUM_5;
+gpio_num_t VOLUME_DOWN_BUTTON_PIN = GPIO_NUM_6;
+gpio_num_t NEXT_TRACK_BUTTON_PIN = GPIO_NUM_7;
+gpio_num_t PREVIOUS_TRACK_BUTTON_PIN = GPIO_NUM_9;
+gpio_num_t PLAY_PAUSE_BUTTON_PIN = GPIO_NUM_10;
+
+
+BleKeyboard bleKeyboard;
+
+void onVolumeUpPressCb(void *button_handle, void *usr_data) {
+    Serial.println("Volume up button pressed");
+    bleKeyboard.press(KEY_MEDIA_VOLUME_UP);
+}
+
+void onVolumeUpReleaseCb(void *button_handle, void *usr_data) {
+    Serial.println("Volume up button released");
+    bleKeyboard.release(KEY_MEDIA_VOLUME_UP);
+}
+
+void onVolumeDownPressCb(void *button_handle, void *usr_data) {
+    Serial.println("Volume down button pressed");
+    bleKeyboard.press(KEY_MEDIA_VOLUME_DOWN);
+}
+
+void onVolumeDownReleaseCb(void *button_handle, void *usr_data) {
+    Serial.println("Volume down button released");
+    bleKeyboard.release(KEY_MEDIA_VOLUME_DOWN);
+}
+
+void onNextTrackButtonPressCb(void *button_handle, void *usr_data) {
+    Serial.println("Next track button pressed");
+    bleKeyboard.press(KEY_MEDIA_NEXT_TRACK);
+}
+
+void onNextTrackButtonReleaseCb(void *button_handle, void *usr_data) {
+    Serial.println("Next track button released");
+    bleKeyboard.release(KEY_MEDIA_NEXT_TRACK);
+}
+
+void onPreviousTrackButtonPressCb(void *button_handle, void *usr_data) {
+    Serial.println("Previous track button pressed");
+    bleKeyboard.press(KEY_MEDIA_PREVIOUS_TRACK);
+}
+
+void onPreviousTrackButtonReleaseCb(void *button_handle, void *usr_data) {
+    Serial.println("Previous track button released");
+    bleKeyboard.release(KEY_MEDIA_PREVIOUS_TRACK);
+}
+
+void onPlayPauseButtonPressCb(void *button_handle, void *usr_data) {
+    Serial.println("Play/Pause button pressed");
+    bleKeyboard.write(KEY_MEDIA_PLAY_PAUSE);
+}
+
+void initButton(gpio_num_t pin, callbackFunction pressCb, callbackFunction releaseCb) {
+  Button *button = new Button(pin, false);
+  button->attachPressDownEventCb(pressCb, NULL);
+  button->attachPressUpEventCb(releaseCb, NULL);
+}
+
+void initDefaultButtons() {
+  initButton(VOLUME_UP_BUTTON_PIN, &onVolumeUpPressCb, &onVolumeUpReleaseCb);
+  initButton(VOLUME_DOWN_BUTTON_PIN, &onVolumeDownPressCb, &onVolumeDownReleaseCb);
+  initButton(NEXT_TRACK_BUTTON_PIN, &onNextTrackButtonPressCb, &onNextTrackButtonReleaseCb);
+  initButton(PREVIOUS_TRACK_BUTTON_PIN, &onPreviousTrackButtonPressCb, &onPreviousTrackButtonReleaseCb);
+  initButton(PLAY_PAUSE_BUTTON_PIN, &onPlayPauseButtonPressCb, NULL);
+}
+
+void setup() {
+  pinMode(LED,OUTPUT);
+  Serial.begin(115200);
+  Serial.println("Starting BLE work!");
+  bleKeyboard.setName("RallyRemote");
+  bleKeyboard.begin();
+  initDefaultButtons();
+}
+
+
+void loop() {
+  if (!bleKeyboard.isConnected()) {
+    Serial.println("Waiting for connection...");
+      digitalWrite(LED,LOW);
+      delay(500);
+      digitalWrite(LED,HIGH);
+  } else {
+    digitalWrite(LED,LOW);
+    delay(500);
+  }
+  delay(500);
+}
+

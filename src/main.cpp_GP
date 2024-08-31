@@ -1,0 +1,89 @@
+#include <Arduino.h>
+#include <BleGamepad.h>
+#include <Button.h>
+
+gpio_num_t BUTTON_1_PIN = GPIO_NUM_13;
+gpio_num_t BUTTON_2_PIN = GPIO_NUM_12;
+gpio_num_t BUTTON_3_PIN = GPIO_NUM_14;
+gpio_num_t BUTTON_4_PIN = GPIO_NUM_27;
+gpio_num_t BUTTON_5_PIN = GPIO_NUM_26;
+
+BleGamepad bleGamepad;
+
+void onButton1PressCb(void *button_handle, void *usr_data) {
+    Serial.println("BUTTON_1 pressed");
+    bleGamepad.press(BUTTON_11);
+}
+
+void onButton1ReleaseCb(void *button_handle, void *usr_data) {
+    Serial.println("BUTTON_1 released");
+    bleGamepad.release(BUTTON_11);
+}
+
+void onButton2PressCb(void *button_handle, void *usr_data) {
+    Serial.println("VBUTTON_2 pressed");
+    bleGamepad.press(BUTTON_12);
+}
+
+void onButton2ReleaseCb(void *button_handle, void *usr_data) {
+    Serial.println("BUTTON_2 released");
+    bleGamepad.release(BUTTON_12);
+}
+
+void onButton3PressCb(void *button_handle, void *usr_data) {
+    Serial.println("BUTTON_3 pressed");
+    bleGamepad.press(BUTTON_13);
+}
+
+void onButton3ReleaseCb(void *button_handle, void *usr_data) {
+    Serial.println("BUTTON_3 released");
+    bleGamepad.release(BUTTON_13);
+}
+
+void onButton4PressCb(void *button_handle, void *usr_data) {
+    Serial.println("BUTTON_4 pressed");
+    bleGamepad.press(BUTTON_14);
+}
+
+void onButton4ReleaseCb(void *button_handle, void *usr_data) {
+    Serial.println("BUTTON_4 released");
+    bleGamepad.release(BUTTON_14);
+}
+
+void onButton5PressCb(void *button_handle, void *usr_data) {
+    Serial.println("BUTTON_5 pressed");
+    bleGamepad.press(BUTTON_15);
+    bleGamepad.release(BUTTON_15);
+}
+
+void initButton(gpio_num_t pin, callbackFunction pressCb, callbackFunction releaseCb) {
+  Button *button = new Button(pin, false);
+  button->attachPressDownEventCb(pressCb, NULL);
+  button->attachPressUpEventCb(releaseCb, NULL);
+}
+
+void initDefaultButtons() {
+  initButton(BUTTON_1_PIN, &onButton1PressCb, &onButton1ReleaseCb);
+  initButton(BUTTON_2_PIN, &onButton2PressCb, &onButton2ReleaseCb);
+  initButton(BUTTON_3_PIN, &onButton3PressCb, &onButton3ReleaseCb);
+  initButton(BUTTON_4_PIN, &onButton4PressCb, &onButton4ReleaseCb);
+  initButton(BUTTON_5_PIN, &onButton5PressCb, NULL);
+}
+
+void setup() {
+  Serial.begin(115200);
+  Serial.println("Starting BLE work!");
+  bleGamepad.deviceName = "RallyButton2";
+  bleGamepad.begin();
+  initDefaultButtons();
+}
+
+bool connected = false;
+
+void loop() {
+  if (!bleGamepad.isConnected()) {
+    Serial.println("Waiting for connection...");
+  }
+  delay(1000);
+}
+
