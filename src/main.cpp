@@ -2,82 +2,112 @@
 #include "BleKeyboard.h"
 #include "Button.h"
 
-//ESP32 DEV KIT V1
-// #define LED 2
-// gpio_num_t VOLUME_UP_BUTTON_PIN = GPIO_NUM_13;
-// gpio_num_t VOLUME_DOWN_BUTTON_PIN = GPIO_NUM_12;
-// gpio_num_t NEXT_TRACK_BUTTON_PIN = GPIO_NUM_14;
-// gpio_num_t PREVIOUS_TRACK_BUTTON_PIN = GPIO_NUM_27;
-// gpio_num_t PLAY_PAUSE_BUTTON_PIN = GPIO_NUM_26;
-
-//ESP32-C3 super mini
 #define LED 8
-gpio_num_t VOLUME_UP_BUTTON_PIN = GPIO_NUM_5;
-gpio_num_t VOLUME_DOWN_BUTTON_PIN = GPIO_NUM_6;
-gpio_num_t NEXT_TRACK_BUTTON_PIN = GPIO_NUM_7;
-gpio_num_t PREVIOUS_TRACK_BUTTON_PIN = GPIO_NUM_9;
-gpio_num_t PLAY_PAUSE_BUTTON_PIN = GPIO_NUM_10;
 
+#define BUTTON_1_PIN GPIO_NUM_5
+#define BUTTON_2_PIN GPIO_NUM_6
+#define BUTTON_3_PIN GPIO_NUM_7
+#define BUTTON_4_PIN GPIO_NUM_3
+#define BUTTON_UP_PIN GPIO_NUM_9
+#define BUTTON_DOWN_PIN GPIO_NUM_10
 
 BleKeyboard bleKeyboard;
 
-void onVolumeUpPressCb(void *button_handle, void *usr_data) {
-    Serial.println("Volume up button pressed");
+void onButtonUpPressCb(void *button_handle, void *usr_data) {
+    Serial.println("Button up button pressed");
     bleKeyboard.press(KEY_MEDIA_VOLUME_UP);
 }
 
-void onVolumeUpReleaseCb(void *button_handle, void *usr_data) {
-    Serial.println("Volume up button released");
+void onButtonUpReleaseCb(void *button_handle, void *usr_data) {
+    Serial.println("Button up button released");
     bleKeyboard.release(KEY_MEDIA_VOLUME_UP);
 }
 
-void onVolumeDownPressCb(void *button_handle, void *usr_data) {
-    Serial.println("Volume down button pressed");
+void onButtonDownPressCb(void *button_handle, void *usr_data) {
+    Serial.println("Button down button pressed");
     bleKeyboard.press(KEY_MEDIA_VOLUME_DOWN);
 }
 
-void onVolumeDownReleaseCb(void *button_handle, void *usr_data) {
-    Serial.println("Volume down button released");
+void onButtonDownReleaseCb(void *button_handle, void *usr_data) {
+    Serial.println("Button down button released");
     bleKeyboard.release(KEY_MEDIA_VOLUME_DOWN);
 }
 
-void onNextTrackButtonPressCb(void *button_handle, void *usr_data) {
-    Serial.println("Next track button pressed");
+void onButton2PressCb(void *button_handle, void *usr_data) {
+    Serial.println("Button 2 / Next track button pressed");
     bleKeyboard.press(KEY_MEDIA_NEXT_TRACK);
 }
 
-void onNextTrackButtonReleaseCb(void *button_handle, void *usr_data) {
-    Serial.println("Next track button released");
+void onButton2ReleaseCb(void *button_handle, void *usr_data) {
+    Serial.println("Button 2 / Next track button released");
     bleKeyboard.release(KEY_MEDIA_NEXT_TRACK);
 }
 
-void onPreviousTrackButtonPressCb(void *button_handle, void *usr_data) {
-    Serial.println("Previous track button pressed");
+void onButton1PressCb(void *button_handle, void *usr_data) {
+    Serial.println("Button 1 / Previous track button pressed");
     bleKeyboard.press(KEY_MEDIA_PREVIOUS_TRACK);
 }
 
-void onPreviousTrackButtonReleaseCb(void *button_handle, void *usr_data) {
-    Serial.println("Previous track button released");
+void onButton1ReleaseCb(void *button_handle, void *usr_data) {
+    Serial.println("Button 1 / Previous track button released");
     bleKeyboard.release(KEY_MEDIA_PREVIOUS_TRACK);
 }
 
-void onPlayPauseButtonPressCb(void *button_handle, void *usr_data) {
-    Serial.println("Play/Pause button pressed");
+void onButton3PressCb(void *button_handle, void *usr_data) {
+    Serial.println("Button 3 pressed");
+    bleKeyboard.write(KEY_MEDIA_STOP);
+}
+
+void onButton3DoubleCb(void *button_handle, void *usr_data) {
+    Serial.println("Button 3 double click");
+    bleKeyboard.write(KEY_NUM_0);
+}
+
+void onButton3LongCb(void *button_handle, void *usr_data) {
+    Serial.println("Button 3 long press");
+    bleKeyboard.write(KEY_NUM_1);
+}
+
+
+void onButton4PressCb(void *button_handle, void *usr_data) {
+    Serial.println("Button 4 pressed");
     bleKeyboard.write(KEY_MEDIA_PLAY_PAUSE);
 }
 
-void initButton(gpio_num_t pin, callbackFunction pressCb, callbackFunction releaseCb) {
+void onButton4DoubleCb(void *button_handle, void *usr_data) {
+    Serial.println("Button 4 double click");
+    bleKeyboard.write(KEY_NUM_2);
+
+}
+
+void onButton4LongCb(void *button_handle, void *usr_data) {
+    Serial.println("Button 4 long press");
+    bleKeyboard.write(KEY_NUM_3);
+
+}
+
+Button* initButtonDownUp(gpio_num_t pin, callbackFunction pressCb, callbackFunction releaseCb) {
   Button *button = new Button(pin, false);
   button->attachPressDownEventCb(pressCb, NULL);
   button->attachPressUpEventCb(releaseCb, NULL);
+  return button;
 }
 
 void initDefaultButtons() {
-  initButton(VOLUME_UP_BUTTON_PIN, &onVolumeUpPressCb, &onVolumeUpReleaseCb);
-  initButton(VOLUME_DOWN_BUTTON_PIN, &onVolumeDownPressCb, &onVolumeDownReleaseCb);
-  initButton(NEXT_TRACK_BUTTON_PIN, &onNextTrackButtonPressCb, &onNextTrackButtonReleaseCb);
-  initButton(PREVIOUS_TRACK_BUTTON_PIN, &onPreviousTrackButtonPressCb, &onPreviousTrackButtonReleaseCb);
-  initButton(PLAY_PAUSE_BUTTON_PIN, &onPlayPauseButtonPressCb, NULL);
+  initButtonDownUp(BUTTON_1_PIN, &onButton1PressCb, &onButton1ReleaseCb);
+  initButtonDownUp(BUTTON_2_PIN, &onButton2PressCb, &onButton2ReleaseCb);
+  initButtonDownUp(BUTTON_UP_PIN, &onButtonUpPressCb, &onButtonUpReleaseCb);
+  initButtonDownUp(BUTTON_DOWN_PIN, &onButtonDownPressCb, &onButtonDownReleaseCb);
+
+  Button* button3 = new Button(BUTTON_3_PIN, false);
+  button3->attachSingleClickEventCb(&onButton3PressCb, NULL);
+  button3->attachDoubleClickEventCb(&onButton3DoubleCb, NULL);
+  button3->attachLongPressStartEventCb(&onButton3LongCb, NULL);
+
+  Button* button4 = new Button(BUTTON_4_PIN, false);
+  button4->attachSingleClickEventCb(&onButton4PressCb, NULL);
+  button4->attachDoubleClickEventCb(&onButton4DoubleCb, NULL);
+  button4->attachLongPressStartEventCb(&onButton4LongCb, NULL);
 }
 
 void setup() {
@@ -92,7 +122,7 @@ void setup() {
 
 void loop() {
   if (!bleKeyboard.isConnected()) {
-    Serial.println("Waiting for connection...");
+      Serial.println("Waiting for connection...");
       digitalWrite(LED,LOW);
       delay(500);
       digitalWrite(LED,HIGH);
