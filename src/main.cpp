@@ -5,7 +5,6 @@
 #include <WiFiClient.h>
 #include <WebServer.h>
 #include <BleKeyboard.h>
-#include <NimBLEDevice.h>
 
 #define LED 8
 
@@ -166,11 +165,6 @@ void setup() {
     
     bleKeyboard.setName("RallyRemote");
     bleKeyboard.begin();
-    
-    // workaround to fix the connection with esp32 c3
-    BLEDevice::setSecurityAuth(ESP_LE_AUTH_NO_BOND);
-    BLEDevice::setSecurityIOCap(ESP_IO_CAP_NONE);
-    BLEDevice::setSecurityInitKey(BLE_SM_PAIR_KEY_DIST_ID | BLE_SM_PAIR_KEY_DIST_ENC);
 }
 
 void loop() {
