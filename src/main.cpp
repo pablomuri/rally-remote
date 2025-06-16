@@ -5,6 +5,7 @@
 #include <WiFiClient.h>
 #include <WebServer.h>
 #include <BleKeyboard.h>
+#include <RallyConf.h>
 
 #define LED 8
 
@@ -15,10 +16,9 @@
 #define BUTTON_UP_PIN GPIO_NUM_9
 #define BUTTON_DOWN_PIN GPIO_NUM_10
 
-const char* ssid = "RallyOTA";
+const char* SSID = "RallyOTA";
 
 WebServer server(80);
-
 BleKeyboard bleKeyboard;
 
 static void onButtonUpPressCb(void *button_handle, void *usr_data) {
@@ -133,7 +133,7 @@ void updateOtaLoop(){
     pinMode(BUTTON_2_PIN, INPUT_PULLUP);
     if (digitalRead(BUTTON_1_PIN) == LOW && digitalRead(BUTTON_2_PIN) == LOW) {
         WiFi.mode(WIFI_AP);
-        WiFi.softAP(ssid);
+        WiFi.softAP(SSID);
 
         Serial.print("AP IP address: ");
         Serial.println(WiFi.softAPIP());
@@ -159,6 +159,10 @@ void setup() {
     Serial.begin(115200);
     Serial.println("Starting Rally Remote!");
 
+    RallyConf conf;
+
+    conf.begin();
+    
     updateOtaLoop();
 
     initDefaultButtons();
