@@ -4,7 +4,7 @@
 #include <WiFi.h>
 #include <WiFiClient.h>
 #include <WebServer.h>
-#include <BleKeyboard.h>
+#include <BleGamepad.h>
 
 #define LED 8
 
@@ -19,76 +19,94 @@ const char* ssid = "RallyOTA";
 
 WebServer server(80);
 
-BleKeyboard bleKeyboard;
+BleGamepad bleGamepad("RallyRemote");
+
+void pressGamepadButton(uint8_t button) {
+    bleGamepad.press(button);
+    bleGamepad.sendReport();
+}
+
+void releaseGamepadButton(uint8_t button) {
+    bleGamepad.release(button);
+    bleGamepad.sendReport();
+}
+
+void pressAndReleaseGamepadButton(uint8_t button, uint16_t delayMs = 100) {
+    bleGamepad.press(button);
+    bleGamepad.sendReport();
+    delay(delayMs);
+    bleGamepad.release(button);
+    bleGamepad.sendReport();
+}
 
 static void onButtonUpPressCb(void *button_handle, void *usr_data) {
-    Serial.println("Button up button pressed");
-    bleKeyboard.press(KEY_MEDIA_VOLUME_UP);
+    Serial.println("Button up pressed - Gamepad BUTTON_9");
+    pressGamepadButton(BUTTON_9);
 }
 
 static void onButtonUpReleaseCb(void *button_handle, void *usr_data) {
-    Serial.println("Button up button released");
-    bleKeyboard.release(KEY_MEDIA_VOLUME_UP);
+    Serial.println("Button up released - Gamepad BUTTON_9");
+    releaseGamepadButton(BUTTON_9);
 }
 
 static void onButtonDownPressCb(void *button_handle, void *usr_data) {
-    Serial.println("Button down button pressed");
-    bleKeyboard.press(KEY_MEDIA_VOLUME_DOWN);
+    Serial.println("Button down pressed - Gamepad BUTTON_10");
+    pressGamepadButton(BUTTON_10);
 }
 
 static void onButtonDownReleaseCb(void *button_handle, void *usr_data) {
-    Serial.println("Button down button released");
-    bleKeyboard.release(KEY_MEDIA_VOLUME_DOWN);
+    Serial.println("Button down released - Gamepad BUTTON_10");
+    releaseGamepadButton(BUTTON_10);
 }
 
 static void onButton2PressCb(void *button_handle, void *usr_data) {
-    Serial.println("Button 2 / Next track button pressed");
-    bleKeyboard.press(KEY_MEDIA_NEXT_TRACK);
+    Serial.println("Button 2 pressed - Gamepad BUTTON_6");
+    pressGamepadButton(BUTTON_6);
 }
 
 static void onButton2ReleaseCb(void *button_handle, void *usr_data) {
-    Serial.println("Button 2 / Next track button released");
-    bleKeyboard.release(KEY_MEDIA_NEXT_TRACK);
+    Serial.println("Button 2 released - Gamepad BUTTON_6");
+    releaseGamepadButton(BUTTON_6);
 }
 
 static void onButton1PressCb(void *button_handle, void *usr_data) {
-    Serial.println("Button 1 / Previous track button pressed");
-    bleKeyboard.press(KEY_MEDIA_PREVIOUS_TRACK);
+    Serial.println("Button 1 pressed - Gamepad BUTTON_7");
+    pressGamepadButton(BUTTON_7);
 }
 
 static void onButton1ReleaseCb(void *button_handle, void *usr_data) {
-    Serial.println("Button 1 / Previous track button released");
-    bleKeyboard.release(KEY_MEDIA_PREVIOUS_TRACK);
+    Serial.println("Button 1 released - Gamepad BUTTON_7");
+    releaseGamepadButton(BUTTON_7);
 }
 
 static void onButton3PressCb(void *button_handle, void *usr_data) {
-    Serial.println("Button 3 pressed");
-    bleKeyboard.write(KEY_NUM_ASTERISK);
+    Serial.println("Button 3 pressed - Gamepad BUTTON_1");
+    pressAndReleaseGamepadButton(BUTTON_1);
 }
 
 static void onButton3DoubleCb(void *button_handle, void *usr_data) {
-    Serial.println("Button 3 double click");
-    bleKeyboard.write(KEY_NUM_0);
+    Serial.println("Button 3 double click - Gamepad BUTTON_2");
+    pressAndReleaseGamepadButton(BUTTON_2);
 }
 
 static void onButton3LongCb(void *button_handle, void *usr_data) {
-    Serial.println("Button 3 long press");
-    bleKeyboard.write(KEY_NUM_1);
+    Serial.println("Button 3 long press - Gamepad BUTTON_3");
+    pressAndReleaseGamepadButton(BUTTON_3);
 }
 
 static void onButton4PressCb(void *button_handle, void *usr_data) {
-    Serial.println("Button 4 pressed");
-    bleKeyboard.write(KEY_MEDIA_PLAY_PAUSE);
+    Serial.println("Button 4 pressed - Gamepad BUTTON_8");
+    pressAndReleaseGamepadButton(BUTTON_8);
 }
 
 static void onButton4DoubleCb(void *button_handle, void *usr_data) {
-    Serial.println("Button 4 double click");
-    bleKeyboard.write(KEY_NUM_2);
+    Serial.println("Button 4 double click - Gamepad BUTTON_4");
+    pressAndReleaseGamepadButton(BUTTON_4);
 }
 
 static void onButton4LongCb(void *button_handle, void *usr_data) {
-    Serial.println("Button 4 long press");
-    bleKeyboard.write(KEY_NUM_3);
+    Serial.println("Button 4 long press - Gamepad BUTTON_5");
+    pressAndReleaseGamepadButton(BUTTON_5);
 }
 
 Button *initButtonDownUp(gpio_num_t pin, callbackFunction pressCb, callbackFunction releaseCb) {
@@ -116,7 +134,7 @@ void initDefaultButtons() {
 }
 
 void bluetoothStatusLog() {
-    if (!bleKeyboard.isConnected()) {
+    if (!bleGamepad.isConnected()) {
         Serial.println("Waiting for connection...");
         digitalWrite(LED, LOW);
         delay(500);
@@ -163,8 +181,10 @@ void setup() {
 
     initDefaultButtons();
     
-    bleKeyboard.setName("RallyRemote");
-    bleKeyboard.begin();
+    BleGamepadConfiguration bleGamepadConfig;
+    bleGamepadConfig.setAutoReport(false); // Disable auto-report to have manual control
+    bleGamepadConfig.setButtonCount(16); // Set button count explicitly (default is 16, but needed when auto-report is disabled)
+    bleGamepad.begin(&bleGamepadConfig);
 }
 
 void loop() {
